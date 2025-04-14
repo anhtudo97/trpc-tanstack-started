@@ -1,19 +1,23 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import guitars from '../../data/example-guitars'
+import { useTRPC } from '@/trpc/react';
+import { useQuery } from '@tanstack/react-query';
+import { Link, createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/example/guitars/$guitarId')({
   component: RouteComponent,
-  loader: async ({ params }) => {
-    const guitar = guitars.find((guitar) => guitar.id === +params.guitarId)
-    if (!guitar) {
-      throw new Error('Guitar not found')
-    }
-    return guitar
+  loader: async ({ params, context }) => {
+    context.queryClient.prefetchQuery(
+      await context.trpc.guitars.byId.queryOptions({ id: +params.guitarId })
+    );
   },
-})
+});
 
 function RouteComponent() {
-  const guitar = Route.useLoaderData()
+  // const guitar = Route.useLoaderData();
+  const { guitarId } = Route.useParams();
+  const trpc = useTRPC();
+  const { data: guitar } = useQuery(trpc.guitars.byId.queryOptions({ id: +guitarId }));
+
+  if (!guitar) return <div>Guitar not found</div>;
 
   return (
     <div className="relative min-h-[100vh] flex items-center bg-black text-white p-5">
@@ -21,6 +25,7 @@ function RouteComponent() {
         <Link
           to="/example/guitars"
           className="inline-block mb-4 text-emerald-400 hover:text-emerald-300"
+          suppressHydrationWarning
         >
           &larr; Back to all guitars
         </Link>
@@ -46,5 +51,5 @@ function RouteComponent() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,20 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
-import { Send } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import rehypeHighlight from 'rehype-highlight'
-import remarkGfm from 'remark-gfm'
-import { useChat } from '@ai-sdk/react'
+import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useRef } from 'react';
+import { Send } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
+import { useChat } from '@ai-sdk/react';
 
-import { genAIResponse } from '../utils/demo.ai'
+import { genAIResponse } from '../utils/demo.ai';
 
-import type { UIMessage } from 'ai'
+import type { UIMessage } from 'ai';
 
-import '../demo.index.css'
+import '../demo.index.css';
 
-function InitalLayout({ children }: { children: React.ReactNode }) {
+function InitalLayout({ children }: { children: React.ReactNode; }) {
   return (
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="text-center max-w-3xl mx-auto w-full">
@@ -28,29 +28,29 @@ function InitalLayout({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
-  )
+  );
 }
 
-function ChattingLayout({ children }: { children: React.ReactNode }) {
+function ChattingLayout({ children }: { children: React.ReactNode; }) {
   return (
     <div className="absolute bottom-0 right-0 left-64 bg-gray-900/80 backdrop-blur-sm border-t border-orange-500/10">
       <div className="max-w-3xl mx-auto w-full px-4 py-3">{children}</div>
     </div>
-  )
+  );
 }
 
-function Messages({ messages }: { messages: Array<UIMessage> }) {
-  const messagesContainerRef = useRef<HTMLDivElement>(null)
+function Messages({ messages }: { messages: Array<UIMessage>; }) {
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop =
-        messagesContainerRef.current.scrollHeight
+        messagesContainerRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
 
   if (!messages.length) {
-    return null
+    return null;
   }
 
   return (
@@ -59,11 +59,10 @@ function Messages({ messages }: { messages: Array<UIMessage> }) {
         {messages.map(({ id, role, content }) => (
           <div
             key={id}
-            className={`py-6 ${
-              role === 'assistant'
+            className={`py-6 ${role === 'assistant'
                 ? 'bg-gradient-to-r from-orange-500/5 to-red-600/5'
                 : 'bg-transparent'
-            }`}
+              }`}
           >
             <div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
               {role === 'assistant' ? (
@@ -93,23 +92,23 @@ function Messages({ messages }: { messages: Array<UIMessage> }) {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function ChatPage() {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     initialMessages: [],
     fetch: (_url, options) => {
-      const { messages } = JSON.parse(options!.body! as string)
+      const { messages } = JSON.parse(options!.body! as string);
       return genAIResponse({
         data: {
           messages,
         },
-      })
+      });
     },
-  })
+  });
 
-  const Layout = messages.length ? ChattingLayout : InitalLayout
+  const Layout = messages.length ? ChattingLayout : InitalLayout;
 
   return (
     <div className="relative flex h-[calc(100vh-32px)] bg-gray-900">
@@ -120,6 +119,7 @@ function ChatPage() {
           <form onSubmit={handleSubmit}>
             <div className="relative max-w-xl mx-auto">
               <textarea
+                suppressHydrationWarning={true}
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Type something clever (or don't, we won't judge)..."
@@ -127,15 +127,15 @@ function ChatPage() {
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '200px' }}
                 onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement
-                  target.style.height = 'auto'
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
                   target.style.height =
-                    Math.min(target.scrollHeight, 200) + 'px'
+                    Math.min(target.scrollHeight, 200) + 'px';
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
+                    e.preventDefault();
+                    handleSubmit(e);
                   }
                 }}
               />
@@ -151,9 +151,9 @@ function ChatPage() {
         </Layout>
       </div>
     </div>
-  )
+  );
 }
 
 export const Route = createFileRoute('/example/chat')({
   component: ChatPage,
-})
+});

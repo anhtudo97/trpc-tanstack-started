@@ -15,10 +15,10 @@ export const APIRoute = createAPIFileRoute("/api/messages")({
         getEvent().node.res.statusCode = 200;
         await transport.handleMessage(body);
       } catch (error) {
-        getEvent().node.res.send("Error handling message");
+        getEvent().node.res.end("Error handling message");
       }
     } else {
-      getEvent().node.res.send("No transport found for sessionId");
+      getEvent().node.res.end("No transport found for sessionId");
     }
   },
 });

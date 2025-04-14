@@ -1,16 +1,26 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import guitars from '../../data/example-guitars'
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useTRPC } from '@/trpc/react';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/example/guitars/')({
   component: GuitarsIndex,
-})
+  loader: async ({ context }) => {
+    await context.queryClient.prefetchQuery(
+      context.trpc.guitars.list.queryOptions()
+    );
+  }
+});
 
 function GuitarsIndex() {
+
+  const trpc = useTRPC();
+  const { data: guitars } = useQuery(trpc.guitars.list.queryOptions());
+
   return (
     <div className="bg-black text-white p-5">
       <h1 className="text-3xl font-bold mb-8 text-center">Featured Guitars</h1>
       <div className="flex flex-wrap gap-12 justify-center">
-        {guitars.map((guitar) => (
+        {guitars?.map((guitar) => (
           <div
             key={guitar.id}
             className="w-full md:w-[calc(50%-1.5rem)] xl:w-[calc(33.333%-2rem)] relative mb-24"
@@ -20,6 +30,7 @@ function GuitarsIndex() {
               params={{
                 guitarId: guitar.id.toString(),
               }}
+              suppressHydrationWarning={true}
             >
               <div className="relative z-0 w-full aspect-square mb-8">
                 <div className="w-full h-full overflow-hidden rounded-2xl border-4 border-gray-800 shadow-2xl">
@@ -50,5 +61,5 @@ function GuitarsIndex() {
         ))}
       </div>
     </div>
-  )
+  );
 }
