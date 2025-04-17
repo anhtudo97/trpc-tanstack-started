@@ -3,18 +3,19 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
-} from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+} from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import Header from '../components/Header';
+import Header from "../components/Header";
+import AppClerkProvider from "../integrations/clerk/provider";
+import TanstackQueryLayout from "../integrations/tanstack-query/layout";
+import { CartStoreProvider } from "../store/cart";
 
-import TanstackQueryLayout from '../integrations/tanstack-query/layout';
+import appCss from "../styles.css?url";
 
-import appCss from '../styles.css?url';
-
-import type { QueryClient } from '@tanstack/react-query';
-import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
-import type { TRPCRouter } from '@/trpc/router';
+import type { QueryClient } from "@tanstack/react-query";
+import type { TRPCRouter } from "../trpc/router";
+import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -25,33 +26,37 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
-        title: 'TanStack Start Starter',
+        title: "TanStack Start Starter",
       },
     ],
     links: [
       {
-        rel: 'stylesheet',
+        rel: "stylesheet",
         href: appCss,
       },
     ],
   }),
 
   component: () => (
-    <RootDocument>
-      <Header />
+    <AppClerkProvider>
+      <CartStoreProvider>
+        <RootDocument>
+          <Header />
 
-      <Outlet />
-      <TanStackRouterDevtools />
+          <Outlet />
+          <TanStackRouterDevtools />
 
-      <TanstackQueryLayout />
-    </RootDocument>
+          <TanstackQueryLayout />
+        </RootDocument>
+      </CartStoreProvider>
+    </AppClerkProvider>
   ),
 });
 

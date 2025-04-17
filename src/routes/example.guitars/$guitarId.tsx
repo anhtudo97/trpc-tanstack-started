@@ -1,23 +1,28 @@
-import { useTRPC } from '@/trpc/react';
-import { useQuery } from '@tanstack/react-query';
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/react";
+import { useStore } from "@/store/cart";
 
-export const Route = createFileRoute('/example/guitars/$guitarId')({
+export const Route = createFileRoute("/example/guitars/$guitarId")({
   component: RouteComponent,
-  loader: async ({ params, context }) => {
-    context.queryClient.prefetchQuery(
-      await context.trpc.guitars.byId.queryOptions({ id: +params.guitarId })
+  loader: async ({ context, params }) => {
+    await context.queryClient.prefetchQuery(
+      context.trpc.guitars.byId.queryOptions({ id: +params.guitarId })
     );
   },
 });
 
 function RouteComponent() {
-  // const guitar = Route.useLoaderData();
-  const { guitarId } = Route.useParams();
   const trpc = useTRPC();
-  const { data: guitar } = useQuery(trpc.guitars.byId.queryOptions({ id: +guitarId }));
+  const { guitarId } = Route.useParams();
+  const { data: guitar } = useQuery(
+    trpc.guitars.byId.queryOptions({ id: +guitarId })
+  );
+  const { addToCart } = useStore();
 
-  if (!guitar) return <div>Guitar not found</div>;
+  if (!guitar) {
+    return <div>Guitar not found</div>;
+  }
 
   return (
     <div className="relative min-h-[100vh] flex items-center bg-black text-white p-5">
@@ -25,7 +30,6 @@ function RouteComponent() {
         <Link
           to="/example/guitars"
           className="inline-block mb-4 text-emerald-400 hover:text-emerald-300"
-          suppressHydrationWarning
         >
           &larr; Back to all guitars
         </Link>
@@ -35,7 +39,10 @@ function RouteComponent() {
           <div className="text-2xl font-bold text-emerald-400">
             ${guitar.price}
           </div>
-          <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg transition-colors">
+          <button
+            onClick={() => addToCart(guitar.id)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg transition-colors cursor-pointer"
+          >
             Add to Cart
           </button>
         </div>
